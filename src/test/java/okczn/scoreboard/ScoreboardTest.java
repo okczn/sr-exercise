@@ -86,7 +86,7 @@ public class ScoreboardTest {
         given(matchRepository.matchesInProgress()).willReturn(matches);
 
         // when
-        List<Match> summary = scoreboard.matchSummary();
+        List<ScoreboardEntry> summary = scoreboard.matchSummary();
 
         // then
         assertEquals(5, summary.size());

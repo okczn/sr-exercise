@@ -29,7 +29,7 @@ public class Scoreboard {
 
     }
 
-    public List<Match> matchSummary() {
+    public List<ScoreboardEntry> matchSummary() {
         return null;
     }
 }
