@@ -2,24 +2,30 @@ package okczn.scoreboard.domain;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.UUID;
+
 import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
+import static java.util.UUID.randomUUID;
 
 public class Match {
     private static final String TEAM_REGEX = "(\\p{L}+|\\s)+";
 
+    private final UUID id;
     private final String homeTeam;
     private final String awayTeam;
     private Score score;
     private boolean finished;
 
-    private Match(String homeTeam, String awayTeam, Score score) {
+    private Match(UUID id, String homeTeam, String awayTeam, Score score) {
+        if (id == null) throw new IllegalArgumentException("Non-null id required");
+        if (score == null) throw new IllegalArgumentException("Non-null score required");
         validateTeam("home", homeTeam);
         validateTeam("away", awayTeam);
 
+        this.id = id;
         this.homeTeam = homeTeam;
         this.awayTeam = awayTeam;
-        this.score = requireNonNull(score);
+        this.score = score;
     }
 
     private void validateTeam(String label, String team) {
@@ -27,6 +33,10 @@ public class Match {
             throw new IllegalArgumentException(
                     format("Invalid %s team name: '%s'", label, team));
         }
+    }
+
+    public UUID id() {
+        return id;
     }
 
     public String homeTeam() {
@@ -57,7 +67,28 @@ public class Match {
         finished = true;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Match otherMatch) {
+            return id.equals(otherMatch.id);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
     public static Match start(String homeTeam, String awayTeam) {
-        return new Match(homeTeam, awayTeam, Score.of(0, 0));
+        return new Match(randomUUID(), homeTeam, awayTeam, Score.of(0, 0));
+    }
+
+    /**
+     * Allows to recreate a Match in a repository that needs to restore an entity
+     * from another form, e.g. serialized.
+     */
+    public static Match resume(UUID id, String homeTeam, String awayTeam, Score score) {
+        return new Match(id, homeTeam, awayTeam, score);
     }
 }

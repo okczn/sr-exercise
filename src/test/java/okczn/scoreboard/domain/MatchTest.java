@@ -7,8 +7,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -39,6 +41,7 @@ public class MatchTest {
 
         // then
         assertNotNull(match);
+        assertNotNull(match.id());
         assertEquals("Mexico", match.homeTeam());
         assertEquals("Canada", match.awayTeam());
         assertEquals(Score.of(0, 0), match.score());
@@ -46,7 +49,7 @@ public class MatchTest {
     }
 
     @Test
-    void shouldStartMatchWithUnicodeCharacters() {
+    void shouldAllowUnicodeCharacters() {
         // when
         var match = Match.start("Śląsk Wrocław", "Breiðablik");
 
@@ -54,8 +57,42 @@ public class MatchTest {
         assertNotNull(match);
         assertEquals("Śląsk Wrocław", match.homeTeam());
         assertEquals("Breiðablik", match.awayTeam());
-        assertEquals(Score.of(0, 0), match.score());
-        assertFalse(match.finished());
+    }
+
+    @Test
+    void shouldFailToResumeMatchWithoutId() {
+        assertThrows(IllegalArgumentException.class,
+                () -> Match.resume(null, "Mexico", "Canada", Score.of(1, 1)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidTeams")
+    void shouldFailToResumeWithInvalidHomeTeam(String home) {
+        assertThrows(IllegalArgumentException.class,
+                () -> Match.resume(randomUUID(), home, "Canada", Score.of(1, 1)));
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidTeams")
+    void shouldFailToResumeWithInvalidAwayTeam(String away) {
+        assertThrows(IllegalArgumentException.class,
+                () -> Match.resume(randomUUID(), "Mexico", away, Score.of(1, 1)));
+    }
+
+    @Test
+    void shouldResumeMatch() {
+        // given
+        var id = randomUUID();
+
+        // when
+        var match = Match.resume(id, "Mexico", "Canada", Score.of(3, 2));
+
+        // then
+        assertNotNull(match);
+        assertEquals(id, match.id());
+        assertEquals("Mexico", match.homeTeam());
+        assertEquals("Canada", match.awayTeam());
+        assertEquals(Score.of(3, 2), match.score());
     }
 
     @Test
@@ -115,5 +152,35 @@ public class MatchTest {
 
         // then
         assertTrue(match.finished());
+    }
+
+    @Test
+    void shouldBeEqualWhenIdIsEqual() {
+        // given
+        var match1 = Match.start("Mexico", "Canada");
+        var match2 = Match.resume(match1.id(), "Canada", "Mexico", Score.of(1, 1));
+
+        // then
+        assertEquals(match1, match2);
+    }
+
+    @Test
+    void shouldBeDifferentWhenIdIsDifferent() {
+        // given
+        var match1 = Match.start("Mexico", "Canada");
+        var match2 = Match.start("Mexico", "Canada");
+
+        // then
+        assertNotEquals(match1, match2);
+    }
+
+    @Test
+    void shouldHaveSameHashCodesWhenIdEqual() {
+        // given
+        var match1 = Match.start("Mexico", "Canada");
+        var match2 = Match.resume(match1.id(), "Canada", "Mexico", Score.of(1, 1));
+
+        // then
+        assertEquals(match1.hashCode(), match2.hashCode());
     }
 }

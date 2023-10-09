@@ -10,6 +10,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,7 +54,7 @@ public class ScoreboardTest {
         // given
         var matchId = randomUUID();
         var match = Match.start("Germany", "France");
-        given(matchRepository.byId(matchId)).willReturn(match);
+        given(matchRepository.byId(matchId)).willReturn(Optional.of(match));
 
         // when
         scoreboard.updateScore(matchId, 1, 0);
