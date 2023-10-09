@@ -13,6 +13,7 @@ import java.util.List;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -51,7 +52,7 @@ public class ScoreboardTest {
     void shouldUpdateScore() {
         // given
         var matchId = randomUUID();
-        var match = new Match();
+        var match = Match.start("Germany", "France");
         given(matchRepository.byId(matchId)).willReturn(match);
 
         // when
@@ -76,19 +77,14 @@ public class ScoreboardTest {
     @Test
     void shouldGetMatchSummary() {
         // given
-        var matches = List.of(
-                new Match(),
-                new Match(),
-                new Match(),
-                new Match(),
-                new Match()
-        );
+        var matches = List.of(Match.start("Belgium", "Netherlands"));
         given(matchRepository.matchesInProgress()).willReturn(matches);
 
         // when
         List<ScoreboardEntry> summary = scoreboard.matchSummary();
 
         // then
+        assertNotNull(summary);
         assertEquals(5, summary.size());
     }
 }

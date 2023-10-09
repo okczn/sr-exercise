@@ -22,7 +22,7 @@ public class MatchTest {
     }
 
     private static Stream<String> invalidTeams() {
-        return Stream.of(null, "", " ", "_", "1", "_mexico_", "canada1");
+        return Stream.of(null, "", " ", "_", "1", "_mexico_", "canada1", "Canada!");
     }
 
     @ParameterizedTest
@@ -46,15 +46,38 @@ public class MatchTest {
     }
 
     @Test
+    void shouldStartMatchWithUnicodeCharacters() {
+        // when
+        var match = Match.start("Śląsk Wrocław", "Breiðablik");
+
+        // then
+        assertNotNull(match);
+        assertEquals("Śląsk Wrocław", match.homeTeam());
+        assertEquals("Breiðablik", match.awayTeam());
+        assertEquals(Score.of(0, 0), match.score());
+        assertFalse(match.finished());
+    }
+
+    @Test
     void shouldFailToSetLowerScore() {
         // given
         var match = Match.start("Spain", "Brazil");
-        match.updateScore(1, 0);
         match.updateScore(1, 1);
 
         // then
         var exception = assertThrows(IllegalStateException.class, () -> match.updateScore(1, 0));
-        assertEquals("Cannot update to lower score: 1:1 to 1:0", exception.getMessage());
+        assertEquals("1:1 cannot be updated to 1:0", exception.getMessage());
+    }
+
+    @Test
+    void shouldFailToSetInconsistentScore() {
+        // given
+        var match = Match.start("Spain", "Brazil");
+        match.updateScore(1, 0);
+
+        // then
+        var exception = assertThrows(IllegalStateException.class, () -> match.updateScore(0, 1));
+        assertEquals("1:0 cannot be updated to 0:1", exception.getMessage());
     }
 
     @Test
