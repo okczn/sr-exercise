@@ -10,7 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class InMemoryMatchRepository implements MatchRepository {
-    private Map<UUID, Match> storage = new HashMap<>();
+    private final Map<UUID, Match> storage = new HashMap<>();
 
     @Override
     public void store(Match match) {
@@ -24,6 +24,13 @@ public class InMemoryMatchRepository implements MatchRepository {
 
     @Override
     public List<Match> matchesInProgress() {
-        return null;
+        return storage.values().stream()
+                .filter(m -> !m.finished())
+                .sorted((m1, m2) -> {
+                    var byScore = m2.score().compareTo(m1.score());
+                    if (byScore != 0) return byScore;
+                    return m2.startTime().compareTo(m1.startTime());
+                })
+                .toList();
     }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
+import static java.time.LocalDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -62,21 +63,21 @@ public class MatchTest {
     @Test
     void shouldFailToResumeMatchWithoutId() {
         assertThrows(IllegalArgumentException.class,
-                () -> Match.resume(null, "Mexico", "Canada", Score.of(1, 1)));
+                () -> Match.resume(null, now(), "Mexico", "Canada", Score.of(1, 1), false));
     }
 
     @ParameterizedTest
     @MethodSource("invalidTeams")
     void shouldFailToResumeWithInvalidHomeTeam(String home) {
         assertThrows(IllegalArgumentException.class,
-                () -> Match.resume(randomUUID(), home, "Canada", Score.of(1, 1)));
+                () -> Match.resume(randomUUID(), now(), home, "Canada", Score.of(1, 1), false));
     }
 
     @ParameterizedTest
     @MethodSource("invalidTeams")
     void shouldFailToResumeWithInvalidAwayTeam(String away) {
         assertThrows(IllegalArgumentException.class,
-                () -> Match.resume(randomUUID(), "Mexico", away, Score.of(1, 1)));
+                () -> Match.resume(randomUUID(), now(), "Mexico", away, Score.of(1, 1), false));
     }
 
     @Test
@@ -85,7 +86,7 @@ public class MatchTest {
         var id = randomUUID();
 
         // when
-        var match = Match.resume(id, "Mexico", "Canada", Score.of(3, 2));
+        var match = Match.resume(id, now(), "Mexico", "Canada", Score.of(3, 2), false);
 
         // then
         assertNotNull(match);
@@ -158,7 +159,7 @@ public class MatchTest {
     void shouldBeEqualWhenIdIsEqual() {
         // given
         var match1 = Match.start("Mexico", "Canada");
-        var match2 = Match.resume(match1.id(), "Canada", "Mexico", Score.of(1, 1));
+        var match2 = Match.resume(match1.id(), now(), "Canada", "Mexico", Score.of(1, 1), false);
 
         // then
         assertEquals(match1, match2);
@@ -178,7 +179,7 @@ public class MatchTest {
     void shouldHaveSameHashCodesWhenIdEqual() {
         // given
         var match1 = Match.start("Mexico", "Canada");
-        var match2 = Match.resume(match1.id(), "Canada", "Mexico", Score.of(1, 1));
+        var match2 = Match.resume(match1.id(), now(), "Canada", "Mexico", Score.of(1, 1), false);
 
         // then
         assertEquals(match1.hashCode(), match2.hashCode());
