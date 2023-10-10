@@ -18,18 +18,26 @@ public class Scoreboard {
     }
 
     public void startMatch(String homeTeam, String awayTeam) {
-
+        var match = Match.start(homeTeam, awayTeam);
+        matchRepository.store(match);
     }
 
     public void updateScore(UUID matchId, int home, int away) {
-
+        var match = matchRepository.byId(matchId).orElseThrow();
+        match.updateScore(home, away);
+        matchRepository.store(match);
     }
 
     public void finishMatch(UUID matchId) {
-
+        var match = matchRepository.byId(matchId).orElseThrow();
+        match.finish();
+        matchRepository.store(match);
     }
 
     public List<ScoreboardEntry> matchSummary() {
-        return null;
+        return matchRepository.matchesInProgress().stream()
+                .map(match -> new ScoreboardEntry(
+                        match.homeTeam(), match.score().home(), match.awayTeam(), match.score().away()))
+                .toList();
     }
 }

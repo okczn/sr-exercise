@@ -2,6 +2,7 @@ package okczn.scoreboard;
 
 import okczn.scoreboard.domain.Match;
 import okczn.scoreboard.domain.MatchRepository;
+import okczn.scoreboard.domain.Score;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,12 +10,16 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -50,6 +55,12 @@ public class ScoreboardTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenUpdatedMatchNotFound() {
+        assertThrows(NoSuchElementException.class,
+                () -> scoreboard.updateScore(randomUUID(), 1, 1));
+    }
+
+    @Test
     void shouldUpdateScore() {
         // given
         var matchId = randomUUID();
@@ -64,12 +75,19 @@ public class ScoreboardTest {
     }
 
     @Test
+    void shouldThrowExceptionWhenFinishedMatchNotFound() {
+        assertThrows(NoSuchElementException.class,
+                () -> scoreboard.finishMatch(randomUUID()));
+    }
+
+    @Test
     void shouldFinishAndStoreMatch() {
         // given
-        var matchId = randomUUID();
+        var match = Match.start("Germany", "France");
+        given(matchRepository.byId(match.id())).willReturn(Optional.of(match));
 
         // when
-        scoreboard.finishMatch(matchId);
+        scoreboard.finishMatch(match.id());
 
         // then
         verify(matchRepository).store(matchCaptor.capture());
@@ -78,7 +96,11 @@ public class ScoreboardTest {
     @Test
     void shouldGetMatchSummary() {
         // given
-        var matches = List.of(Match.start("Belgium", "Netherlands"));
+        var matches = List.of(
+                Match.resume(randomUUID(), now(), "Belgium", "Netherlands", Score.of(2, 2), false),
+                Match.resume(randomUUID(), now(), "Italy", "Argentina", Score.of(3, 1), false),
+                Match.resume(randomUUID(), now(), "Scotland", "Spain", Score.of(0, 1), false)
+        );
         given(matchRepository.matchesInProgress()).willReturn(matches);
 
         // when
@@ -86,6 +108,9 @@ public class ScoreboardTest {
 
         // then
         assertNotNull(summary);
-        assertEquals(5, summary.size());
+        assertEquals(3, summary.size());
+        assertEquals("Belgium 2 - Netherlands 2", summary.get(0).toString());
+        assertEquals("Italy 3 - Argentina 1", summary.get(1).toString());
+        assertEquals("Scotland 0 - Spain 1", summary.get(2).toString());
     }
 }
