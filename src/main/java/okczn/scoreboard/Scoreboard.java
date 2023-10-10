@@ -17,9 +17,10 @@ public class Scoreboard {
         this.matchRepository = matchRepository;
     }
 
-    public void startMatch(String homeTeam, String awayTeam) {
+    public UUID startMatch(String homeTeam, String awayTeam) {
         var match = Match.start(homeTeam, awayTeam);
         matchRepository.store(match);
+        return match.id();
     }
 
     public void updateScore(UUID matchId, int home, int away) {

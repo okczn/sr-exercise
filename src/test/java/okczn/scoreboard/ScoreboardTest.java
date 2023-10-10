@@ -48,9 +48,10 @@ public class ScoreboardTest {
     @Test
     void shouldStartMatch() {
         // when
-        scoreboard.startMatch("Mexico", "Canada");
+        var id = scoreboard.startMatch("Mexico", "Canada");
 
         // then
+        assertNotNull(id);
         verify(matchRepository).store(matchCaptor.capture());
     }
 
