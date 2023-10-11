@@ -5,8 +5,7 @@ import okczn.scoreboard.ScoreboardEntry;
 import okczn.scoreboard.infrastructure.InMemoryMatchRepository;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -18,14 +17,22 @@ public class ScoreboardIT {
 
         var id = scoreboard.startMatch("Mexico", "Canada");
         scoreboard.updateScore(id, 0, 5);
+
         id = scoreboard.startMatch("Spain", "Brazil");
         scoreboard.updateScore(id, 10, 2);
+
         id = scoreboard.startMatch("Germany", "France");
         scoreboard.updateScore(id, 2, 2);
+
         id = scoreboard.startMatch("Uruguay", "Italy");
         scoreboard.updateScore(id, 6, 6);
+
         id = scoreboard.startMatch("Argentina", "Australia");
         scoreboard.updateScore(id, 3, 1);
+
+        id = scoreboard.startMatch("Netherlands", "England");
+        scoreboard.updateScore(id, 1, 1);
+        scoreboard.finishMatch(id);
 
         // when
         var summary = scoreboard.matchSummary();
@@ -42,14 +49,14 @@ public class ScoreboardIT {
     private static void assertEntry(
             String homeTeam, String awayTeam, int homeScore, int awayScore, ScoreboardEntry entry) {
 
-        var expected = String.join(" ",
+        var expected = List.of(
                 homeTeam,
                 String.valueOf(homeScore),
                 awayTeam,
                 String.valueOf(awayScore)
         );
 
-        var actual = String.join(" ",
+        var actual = List.of(
                 entry.homeTeam(),
                 String.valueOf(entry.homeScore()),
                 entry.awayTeam(),
