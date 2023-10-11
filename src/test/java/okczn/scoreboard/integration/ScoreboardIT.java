@@ -13,7 +13,7 @@ public class ScoreboardIT {
     @Test
     void shouldAddUpdateAndGetScores() {
         // given
-        var scoreboard = new Scoreboard(new InMemoryMatchRepository());
+        var scoreboard = new Scoreboard();
 
         var id = scoreboard.startMatch("Mexico", "Canada");
         scoreboard.updateScore(id, 0, 5);

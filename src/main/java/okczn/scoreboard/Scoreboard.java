@@ -2,6 +2,7 @@ package okczn.scoreboard;
 
 import okczn.scoreboard.domain.Match;
 import okczn.scoreboard.domain.MatchRepository;
+import okczn.scoreboard.infrastructure.InMemoryMatchRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,6 +13,10 @@ import java.util.UUID;
  */
 public class Scoreboard {
     private final MatchRepository matchRepository;
+
+    public Scoreboard() {
+        this(new InMemoryMatchRepository());
+    }
 
     public Scoreboard(MatchRepository matchRepository) {
         this.matchRepository = matchRepository;
