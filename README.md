@@ -78,5 +78,3 @@ including application, domain and infrastructure tiers.
 Considering the library is simple and has only 4 use 
 cases, there is one application service, brought to the 
 main package for simplicity.
-
-The domain model is not exposed, instead

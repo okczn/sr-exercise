@@ -8,6 +8,11 @@ import java.util.UUID;
 import static java.lang.String.format;
 import static java.util.UUID.randomUUID;
 
+/**
+ * An entity and aggregate root representing a match.
+ * The entity class provides factory methods to start a new match
+ * and to recreate an entity from a persistent storage, if needed.
+ */
 public class Match {
     private static final String TEAM_REGEX = "(\\p{L}+|\\s)+";
 
@@ -43,6 +48,11 @@ public class Match {
         return id;
     }
 
+    /**
+     * The date and time of the entity creation (not updated by {@link #resume(UUID, LocalDateTime, String, String, Score, boolean)}).
+     *
+     * @return the date and time when the entity was first created
+     */
     public LocalDateTime startTime() {
         return startTime;
     }
@@ -67,10 +77,16 @@ public class Match {
         score = newScore;
     }
 
+    /**
+     * @return true if this match has been marked as finished
+     */
     public boolean finished() {
         return finished;
     }
 
+    /**
+     * Marks this match as finished.
+     */
     public void finish() {
         finished = true;
     }
@@ -93,6 +109,14 @@ public class Match {
         return format("%s %s %s%s", homeTeam, score, awayTeam, finished ? " (finished)" : "");
     }
 
+    /**
+     * Creates a new entity, thus indicating that a match has started.
+     * The timestamp of this invocation is recorded as the start time.
+     *
+     * @param homeTeam the name of the home team
+     * @param awayTeam the name of the away team
+     * @return a new entity
+     */
     public static Match start(String homeTeam, String awayTeam) {
         return new Match(randomUUID(), LocalDateTime.now(), homeTeam, awayTeam, Score.of(0, 0), false);
     }

@@ -1,5 +1,8 @@
 package okczn.scoreboard;
 
+/**
+ * Represents a match to be shown on the match summary.
+ */
 public record ScoreboardEntry(
         String homeTeam,
         int homeScore,
