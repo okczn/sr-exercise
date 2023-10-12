@@ -10,7 +10,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -20,6 +19,7 @@ import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -57,7 +57,7 @@ public class ScoreboardTest {
 
     @Test
     void shouldThrowExceptionWhenUpdatedMatchNotFound() {
-        assertThrows(NoSuchElementException.class,
+        assertThrows(MatchNotFoundException.class,
                 () -> scoreboard.updateScore(randomUUID(), 1, 1));
     }
 
@@ -113,5 +113,30 @@ public class ScoreboardTest {
         assertEquals("Belgium 2 - Netherlands 2", summary.get(0).toString());
         assertEquals("Italy 3 - Argentina 1", summary.get(1).toString());
         assertEquals("Scotland 0 - Spain 1", summary.get(2).toString());
+    }
+
+    @Test
+    void shouldThrowExceptionOnInvalidTeamNames() {
+        assertThrows(InvalidMatchDetailsException.class, () -> scoreboard.startMatch("", ""));
+    }
+
+    @Test
+    void shouldThrowExceptionOnFailedScoreUpdate() {
+        // given
+        var match = Match.start("Brazil", "Argentina");
+        match.updateScore(2, 2);
+        given(matchRepository.byId(match.id())).willReturn(Optional.of(match));
+
+        // then
+        assertThrows(InvalidMatchDetailsException.class, () -> scoreboard.updateScore(match.id(), 1, 0));
+    }
+
+    @Test
+    void shouldThrowMatchNotFoundException() {
+        // given
+        given(matchRepository.byId(any())).willReturn(Optional.empty());
+
+        // then
+        assertThrows(MatchNotFoundException.class, () -> scoreboard.updateScore(randomUUID(), 1, 1));
     }
 }

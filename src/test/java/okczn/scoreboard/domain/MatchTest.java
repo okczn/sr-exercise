@@ -103,8 +103,8 @@ public class MatchTest {
         match.updateScore(1, 1);
 
         // then
-        var exception = assertThrows(IllegalStateException.class, () -> match.updateScore(1, 0));
-        assertEquals("1:1 cannot be updated to 1:0", exception.getMessage());
+        var exception = assertThrows(IllegalScoreUpdateException.class, () -> match.updateScore(1, 0));
+        assertEquals("Cannot update score from 1:1 to 1:0; new score must be higher", exception.getMessage());
     }
 
     @Test
@@ -114,8 +114,8 @@ public class MatchTest {
         match.updateScore(1, 0);
 
         // then
-        var exception = assertThrows(IllegalStateException.class, () -> match.updateScore(0, 1));
-        assertEquals("1:0 cannot be updated to 0:1", exception.getMessage());
+        var exception = assertThrows(IllegalScoreUpdateException.class, () -> match.updateScore(0, 1));
+        assertEquals("Cannot update score from 1:0 to 0:1; new score must be higher", exception.getMessage());
     }
 
     @Test

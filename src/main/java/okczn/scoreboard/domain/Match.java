@@ -72,7 +72,7 @@ public class Match {
     public void updateScore(int home, int away) {
         var newScore = Score.of(home, away);
         if (!newScore.isHigherThan(score)) {
-            throw new IllegalStateException(score + " cannot be updated to " + newScore);
+            throw new IllegalScoreUpdateException(score, newScore);
         }
         score = newScore;
     }

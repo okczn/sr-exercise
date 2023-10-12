@@ -1,5 +1,6 @@
 package okczn.scoreboard;
 
+import okczn.scoreboard.domain.IllegalScoreUpdateException;
 import okczn.scoreboard.domain.Match;
 import okczn.scoreboard.domain.MatchRepository;
 import okczn.scoreboard.infrastructure.InMemoryMatchRepository;
@@ -32,12 +33,19 @@ public class Scoreboard {
 
     /**
      * Creates and stores a new Match entity, representing a started match.
+     *
      * @param homeTeam the home team name
      * @param awayTeam the away team name
      * @return the new match identifier to reference this match in further calls
      */
     public UUID startMatch(String homeTeam, String awayTeam) {
-        var match = Match.start(homeTeam, awayTeam);
+        Match result;
+        try {
+            result = Match.start(homeTeam, awayTeam);
+        } catch (IllegalArgumentException e) {
+            throw new InvalidMatchDetailsException(e);
+        }
+        var match = result;
         matchRepository.store(match);
         return match.id();
     }
@@ -48,12 +56,16 @@ public class Scoreboard {
      * that nether home nor away score can be lower than previously set.
      *
      * @param matchId the id of the match to update
-     * @param home the home score to write
-     * @param away the away score to write
+     * @param home    the home score to write
+     * @param away    the away score to write
      */
     public void updateScore(UUID matchId, int home, int away) {
-        var match = matchRepository.byId(matchId).orElseThrow();
-        match.updateScore(home, away);
+        var match = matchRepository.byId(matchId).orElseThrow(() -> new MatchNotFoundException(matchId));
+        try {
+            match.updateScore(home, away);
+        } catch (IllegalScoreUpdateException e) {
+            throw new InvalidMatchDetailsException(e);
+        }
         matchRepository.store(match);
     }
 

@@ -1,13 +1,14 @@
 package okczn.scoreboard.integration;
 
+import okczn.scoreboard.InvalidMatchDetailsException;
 import okczn.scoreboard.Scoreboard;
 import okczn.scoreboard.ScoreboardEntry;
-import okczn.scoreboard.infrastructure.InMemoryMatchRepository;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ScoreboardIT {
     @Test
@@ -64,5 +65,25 @@ public class ScoreboardIT {
         );
 
         assertEquals(expected, actual);
+    }
+
+    @Test
+    void shouldThrowExceptionOnInvalidTeamNames() {
+        // given
+        var scoreboard = new Scoreboard();
+
+        // then
+        assertThrows(InvalidMatchDetailsException.class, () -> scoreboard.startMatch("", ""));
+    }
+
+    @Test
+    void shouldThrowExceptionOnFailedScoreUpdate() {
+        // given
+        var scoreboard = new Scoreboard();
+        var id = scoreboard.startMatch("Germany", "France");
+        scoreboard.updateScore(id, 2, 2);
+
+        // then
+        assertThrows(InvalidMatchDetailsException.class, () -> scoreboard.updateScore(id, 1, 0));
     }
 }
