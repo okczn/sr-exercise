@@ -77,4 +77,9 @@ architecture
 including application, domain and infrastructure tiers. 
 Considering the library is simple and has only 4 use 
 cases, there is one application service, brought to the 
-main package for simplicity.
+main package for simplicity. Domain classes are not 
+exposed by the application service, a simple DTO is used.
+In this case it does not add great value, however it can 
+be helpful if the library grows and more sophisticated 
+needs emerge regarding returned details, especially if 
+the data should come from multiple aggregates.
